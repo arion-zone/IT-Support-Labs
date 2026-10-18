@@ -1,0 +1,28 @@
+! ===== Branch A router - IPv6 only, OSPFv3 =====
+enable
+configure terminal
+hostname BRANCH-A
+ipv6 unicast-routing
+!
+interface fa0/0
+ ipv6 address 2001:db8:acad:2::1/64
+ ipv6 ospf 1 area 0
+ no shutdown
+interface se0/0/0
+ description To HQ
+ ipv6 address 2001:db8:acad:12::2/64
+ ipv6 ospf 1 area 0
+ no shutdown
+interface se0/0/1
+ description To Branch B
+ ipv6 address 2001:db8:acad:23::1/64
+ ipv6 ospf 1 area 0
+ no shutdown
+exit
+ipv6 router ospf 1
+ router-id 2.2.2.2
+exit
+! Reach the NAT-PT prefix (IPv4 world) via HQ
+ipv6 route 2001:db8:ffff::/96 2001:db8:acad:12::1
+end
+write memory

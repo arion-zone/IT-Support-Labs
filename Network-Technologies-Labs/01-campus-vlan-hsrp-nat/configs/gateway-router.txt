@@ -1,0 +1,36 @@
+! ===== Gateway router (1841) - RIPv2 + NAT overload - example values =====
+enable
+configure terminal
+hostname GATEWAY
+!
+interface fa0/0
+ description Link to CORE-1
+ ip address 10.20.2.97 255.255.255.252
+ ip nat inside
+ no shutdown
+interface fa0/1
+ description Link to CORE-2
+ ip address 10.20.2.101 255.255.255.252
+ ip nat inside
+ no shutdown
+interface se0/0/0
+ description Link to ISP
+ ip address 203.0.113.2 255.255.255.252
+ ip nat outside
+ no shutdown
+exit
+!
+router rip
+ version 2
+ no auto-summary
+ network 10.0.0.0
+ default-information originate
+exit
+ip route 0.0.0.0 0.0.0.0 203.0.113.1
+!
+! PAT: translate the whole campus to the outside interface
+access-list 1 permit 10.20.0.0 0.0.255.255
+ip nat inside source list 1 interface se0/0/0 overload
+end
+write memory
+! Verify: show ip nat translations | show ip nat statistics | show ip route

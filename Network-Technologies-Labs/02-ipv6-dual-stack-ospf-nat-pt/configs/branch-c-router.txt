@@ -1,0 +1,24 @@
+! ===== Branch C router - legacy IPv4, OSPFv2 =====
+enable
+configure terminal
+hostname BRANCH-C
+!
+interface fa0/0
+ ip address 198.51.100.1 255.255.255.128
+ no shutdown
+interface se0/0/0
+ description To HQ
+ ip address 198.51.100.129 255.255.255.252
+ clock rate 64000
+ no shutdown
+exit
+router ospf 1
+ router-id 4.4.4.4
+ network 198.51.100.0 0.0.0.127 area 0
+ network 198.51.100.128 0.0.0.3 area 0
+exit
+! NAT-PT aliases (e.g. 198.51.100.200) live on HQ - send unknown traffic there
+ip route 0.0.0.0 0.0.0.0 198.51.100.130
+end
+write memory
+! Verify: show ip ospf neighbor | show ip route ospf

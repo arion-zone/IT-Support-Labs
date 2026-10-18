@@ -1,0 +1,65 @@
+! ===== Core-1 (Layer 3 switch, HSRP ACTIVE) - example values =====
+enable
+configure terminal
+hostname CORE-1
+ip routing
+!
+vlan 10
+vlan 20
+vlan 30
+vlan 40
+vlan 50
+exit
+!
+interface vlan 10
+ ip address 10.20.0.2 255.255.255.0
+ standby 10 ip 10.20.0.1
+ standby 10 priority 110
+ standby 10 preempt
+ no shutdown
+interface vlan 20
+ ip address 10.20.1.2 255.255.255.128
+ standby 20 ip 10.20.1.1
+ standby 20 priority 110
+ standby 20 preempt
+ no shutdown
+interface vlan 30
+ ip address 10.20.1.130 255.255.255.128
+ standby 30 ip 10.20.1.129
+ standby 30 priority 110
+ standby 30 preempt
+ no shutdown
+interface vlan 40
+ ip address 10.20.2.2 255.255.255.192
+ standby 40 ip 10.20.2.1
+ standby 40 priority 110
+ standby 40 preempt
+ no shutdown
+interface vlan 50
+ ip address 10.20.2.66 255.255.255.224
+ standby 50 ip 10.20.2.65
+ standby 50 priority 110
+ standby 50 preempt
+ no shutdown
+exit
+!
+! Trunks to access switches
+interface range fa0/1 - 5
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+exit
+!
+! Routed uplink to gateway
+interface fa0/6
+ no switchport
+ ip address 10.20.2.98 255.255.255.252
+ no shutdown
+exit
+!
+router rip
+ version 2
+ no auto-summary
+ network 10.0.0.0
+end
+write memory
+! Verify: show standby brief | show ip route | show ip interface brief

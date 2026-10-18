@@ -1,0 +1,47 @@
+! ===== HQ router - IPv6 LAN, OSPFv3 to branches, OSPFv2 + NAT-PT to IPv4 branch =====
+! Example addressing (documentation prefixes)
+enable
+configure terminal
+hostname HQ
+ipv6 unicast-routing
+!
+interface fa0/0
+ description HQ IPv6 LAN
+ ipv6 address 2001:db8:acad:1::1/64
+ ipv6 ospf 1 area 0
+ ipv6 nat
+ no shutdown
+interface se0/0/1
+ description To Branch A
+ ipv6 address 2001:db8:acad:12::1/64
+ ipv6 ospf 1 area 0
+ no shutdown
+interface se0/1/0
+ description To Branch B
+ ipv6 address 2001:db8:acad:13::1/64
+ ipv6 ospf 1 area 0
+ no shutdown
+interface se0/0/0
+ description To Branch C (IPv4)
+ ip address 198.51.100.130 255.255.255.252
+ ipv6 nat
+ no shutdown
+exit
+!
+ipv6 router ospf 1
+ router-id 1.1.1.1
+exit
+router ospf 1
+ router-id 1.1.1.1
+ network 198.51.100.128 0.0.0.3 area 0
+exit
+!
+! ---- NAT-PT ----
+! IPv4 server in Branch C appears to IPv6 hosts as an address inside the NAT-PT prefix
+ipv6 nat v4v6 source 198.51.100.100 2001:db8:ffff::c633:6464
+! HQ IPv6 server appears to IPv4 hosts as 198.51.100.200
+ipv6 nat v6v4 source 2001:db8:acad:1::100 198.51.100.200
+ipv6 nat prefix 2001:db8:ffff::/96
+end
+write memory
+! Verify: show ipv6 ospf neighbor | show ip ospf neighbor | show ipv6 nat translations

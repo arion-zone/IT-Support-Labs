@@ -1,0 +1,28 @@
+! ===== Access switch template (2960) - example values =====
+enable
+configure terminal
+hostname ACCESS-BLDG1
+vlan 10
+ name SALES
+vlan 20
+ name OPERATIONS
+exit
+!
+! Uplinks to Core-1 and Core-2
+interface range fa0/1 , fa0/4
+ switchport mode trunk
+ no shutdown
+exit
+!
+! User / phone ports
+interface fa0/2
+ switchport mode access
+ switchport access vlan 10
+ no shutdown
+interface fa0/3
+ switchport mode access
+ switchport access vlan 20
+ no shutdown
+end
+write memory
+! Verify: show vlan brief | show interfaces trunk

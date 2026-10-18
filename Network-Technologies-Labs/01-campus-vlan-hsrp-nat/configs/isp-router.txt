@@ -1,0 +1,11 @@
+! ===== ISP router - example values =====
+enable
+configure terminal
+hostname ISP
+interface se0/0/0
+ ip address 203.0.113.1 255.255.255.252
+ clock rate 64000
+ no shutdown
+end
+write memory
+! No route to 10.20.0.0/16 is needed: the campus is hidden behind 203.0.113.2 by PAT.
