@@ -38,7 +38,9 @@ A company is building a server for a site that has no network path to a domain c
 
 | File | Description |
 |---|---|
-| [`runbook.md`](runbook.md) | Step-by-step procedure |
+| [`lab_summary.md`](lab_summary.md) | Walkthrough of my lab build, with a screenshot for every step |
+| [`screenshots/`](screenshots/) | Lab evidence (identifiers blurred) |
+| [`runbook.md`](runbook.md) | Step-by-step procedure with generic names |
 | [`scripts/offline-domain-join.cmd`](scripts/offline-domain-join.cmd) | djoin provisioning and apply |
 | [`scripts/account-audit.ps1`](scripts/account-audit.ps1) | Locked, disabled and inactive account report |
 | [`troubleshooting.md`](troubleshooting.md) | Common failures and fixes |

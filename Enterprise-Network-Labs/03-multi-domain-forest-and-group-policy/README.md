@@ -49,7 +49,9 @@ An organisation with a head office and two regional offices wants:
 
 | File | Description |
 |---|---|
-| [`runbook.md`](runbook.md) | Step-by-step build and configuration |
+| [`lab_summary.md`](lab_summary.md) | Walkthrough of my lab build, with a screenshot for every step |
+| [`screenshots/`](screenshots/) | Lab evidence (identifiers blurred) |
+| [`runbook.md`](runbook.md) | Step-by-step build and configuration with generic names |
 | [`scripts/build-forest.ps1`](scripts/build-forest.ps1) | Forest root, child domain and RODC commands |
 | [`scripts/ou-users-groups.ps1`](scripts/ou-users-groups.ps1) | OU, user and group creation |
 | [`troubleshooting.md`](troubleshooting.md) | Common failures and fixes |

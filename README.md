@@ -8,17 +8,21 @@ Each project is a scenario a real organisation might face. For each one I give t
 
 ## Projects
 
+### [Enterprise Network Labs](Enterprise-Network-Labs/)
+
 | # | Project | What it covers |
 |---|---------|----------------|
-| 01 | [Offline Domain Join & Account Auditing](01-offline-domain-join-and-account-auditing/) | `djoin.exe` provisioning, lockout policy, finding locked/disabled/stale accounts, logon and RDP rights |
-| 02 | [DC Deployment with IFM & a Read-Only DC](02-dc-deployment-ifm-and-rodc/) | Install From Media, adding DCs, RODC deployment, Password Replication Policy |
-| 03 | [Multi-Domain Forest & Group Policy](03-multi-domain-forest-and-group-policy/) | Forest/child-domain design, Server Core RODC, OU structure, Software Restriction GPOs, `gpresult` troubleshooting |
+| 01 | [Offline Domain Join & Account Auditing](Enterprise-Network-Labs/01-offline-domain-join-and-account-auditing/) | `djoin.exe` provisioning, lockout policy, finding locked/disabled/stale accounts, logon and RDP rights |
+| 02 | [DC Deployment with IFM & a Read-Only DC](Enterprise-Network-Labs/02-dc-deployment-ifm-and-rodc/) | Install From Media, adding DCs, RODC deployment, Password Replication Policy |
+| 03 | [Multi-Domain Forest & Group Policy](Enterprise-Network-Labs/03-multi-domain-forest-and-group-policy/) | Forest/child-domain design, Server Core RODC, OU structure, Software Restriction GPOs, `gpresult` troubleshooting |
 
 Each project folder contains:
 
 | File | Purpose |
 |---|---|
 | `README.md` | Scenario, design, skills and lessons learned |
+| `lab_summary.md` | Walkthrough of my lab build with screenshots |
+| `screenshots/` | Evidence from my lab environment |
 | `runbook.md` | Step-by-step procedure I can follow (or hand to a colleague) |
 | `scripts/` | PowerShell / CMD used, with placeholders instead of real names |
 | `troubleshooting.md` | Common failures and how to fix them |
@@ -46,4 +50,4 @@ Each project folder contains:
 
 ## About This Portfolio
 
-I learned these skills through university study and hands-on practice. Everything here is my own write-up: the scenarios, runbooks, scripts and notes are written from scratch with generic example names. The repo contains **no** coursework submissions, assessment tasks, marking criteria, course materials or third-party lab content.
+I learned these skills through university study and hands-on practice. The write-ups, runbooks, scripts and troubleshooting notes are my own. The screenshots come from my own lab environment, with student, course and other personal identifiers blurred. The repo does **not** contain submitted reports, assessment briefs, marking criteria or course materials.

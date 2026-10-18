@@ -44,7 +44,9 @@
 
 | File | Description |
 |---|---|
-| [`runbook.md`](runbook.md) | Step-by-step procedure |
+| [`lab_summary.md`](lab_summary.md) | Walkthrough of my lab build, with a screenshot for every step |
+| [`screenshots/`](screenshots/) | Lab evidence (identifiers blurred) |
+| [`runbook.md`](runbook.md) | Step-by-step procedure with generic names |
 | [`scripts/create-ifm.cmd`](scripts/create-ifm.cmd) | IFM creation |
 | [`scripts/deploy-rodc.ps1`](scripts/deploy-rodc.ps1) | RODC promotion and PRP setup |
 | [`troubleshooting.md`](troubleshooting.md) | Common failures and fixes |
