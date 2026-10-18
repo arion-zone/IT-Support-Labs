@@ -6,15 +6,50 @@
 
 A company is building a server for a site that has no network path to a domain controller yet. It must arrive already joined to `corp.example.com`. At the same time the helpdesk wants better control over account security: lock out password-guessing attempts, find locked and stale accounts quickly, and limit who may sign in to servers locally or over RDP.
 
-## Design
+## Solution Architecture
 
-```text
- DC01 (corp.example.com)                 SRV01 (no line-of-sight to DC)
- ──────────────────────                  ──────────────────────────────
- 1. djoin /provision  ──► odj-blob.txt ──►  2. djoin /requestODJ
-    (creates computer account)  (USB / share)  (applies join offline)
-                                             3. reboot → domain member
+```mermaid
+flowchart LR
+    subgraph HQ["Head Office – corp.example.com"]
+        DC01["DC01<br/>Domain Controller · DNS"]:::dc
+        GPO["Domain GPO<br/>Account Lockout Policy<br/>User Rights Assignment"]:::policy
+        CLIENT["CLIENT01<br/>Windows 10"]:::client
+    end
+    subgraph SITE["Remote Site – no DC connectivity"]
+        SRV01["SRV01<br/>Member Server"]:::srv
+    end
+    DC01 -- "1 · djoin /provision<br/>creates computer account" --> BLOB[("Join blob<br/>(secure transfer)")]:::net
+    BLOB -- "2 · djoin /requestODJ" --> SRV01
+    SRV01 -. "3 · reboot → domain member" .-> DC01
+    GPO --> CLIENT
+    GPO --> SRV01
+    classDef dc fill:#1f4e79,stroke:#0d2a45,color:#ffffff
+    classDef srv fill:#2e75b6,stroke:#1f4e79,color:#ffffff
+    classDef client fill:#deebf7,stroke:#2e75b6,color:#0d2a45
+    classDef ro fill:#7f6000,stroke:#4d3a00,color:#ffffff
+    classDef net fill:#e2f0d9,stroke:#548235,color:#1e3d0f
+    classDef edge fill:#595959,stroke:#262626,color:#ffffff
+    classDef policy fill:#fff2cc,stroke:#bf9000,color:#4d3a00
 ```
+
+### Components
+
+| Component | Role |
+|---|---|
+| **DC01** | Domain controller and DNS for `corp.example.com`; provisions the computer account |
+| **SRV01** | Target server joined **offline**, with no network path to a DC during the join |
+| **CLIENT01** | Windows 10 workstation used to test the lockout policy and sign-in rights |
+| **Domain GPO** | Account lockout threshold, *Allow log on locally*, *Allow log on through RDS* |
+
+### Design Decisions
+
+| Decision | Rationale |
+|---|---|
+| Offline Domain Join instead of a standard join | The site has no line-of-sight to a DC. ODJ lets the device arrive already joined |
+| Delete the stale computer object before re-provisioning | Avoids name/SID conflicts and broken secure channels |
+| Treat the join blob as a credential | It contains the machine account password, so delete it after use |
+| Lockout policy at **domain** level | Account policies only take effect from a domain-linked GPO |
+| RDP access through a security group | Least privilege: access is granted and removed by group membership, not per user |
 
 ## What I Practised
 

@@ -10,21 +10,55 @@ An organisation with a head office and two regional offices wants:
 - An OU structure separating standard staff from IT admins
 - Group Policy that **blocks unapproved applications** for standard staff but not for IT
 
-## Design
+## Solution Architecture
 
-```text
-                      corp.example.com  (forest root – head office)
-                      DC01
-                        │
-        ┌───────────────┼──────────────────┐
-        │               │                  │
- north.corp.example.com  south.corp.example.com   RODC01 (Server Core)
- DC-NORTH                DC-SOUTH                 read-only DC for corp.example.com
+```mermaid
+flowchart TB
+    subgraph FOREST["Active Directory Forest"]
+        ROOT["corp.example.com<br/>Forest root · Head Office<br/>DC01"]:::dc
+        NORTH["north.corp.example.com<br/>Child domain · Region 1<br/>DC-NORTH"]:::dc
+        SOUTH["south.corp.example.com<br/>Child domain · Region 2<br/>DC-SOUTH"]:::dc
+        RODC["RODC01 · Server Core<br/>Read-Only DC for corp.example.com"]:::ro
+    end
+    ROOT --> NORTH
+    ROOT --> SOUTH
+    ROOT -. "read-only replica" .-> RODC
 
- OUs in corp.example.com
- ├── Staff        ← GPO "Block-Unapproved-Apps" linked here
- └── IT-Admins    ← not in scope of the block
+    subgraph OUS["Organisational Units – corp.example.com"]
+        STAFF["OU: Staff<br/>Standard users"]:::client
+        ADMINS["OU: IT-Admins<br/>Privileged users"]:::client
+    end
+    ROOT --> STAFF
+    ROOT --> ADMINS
+    GPO["GPO: Block-Unapproved-Apps<br/>Software Restriction Policies"]:::policy -- "linked" --> STAFF
+    classDef dc fill:#1f4e79,stroke:#0d2a45,color:#ffffff
+    classDef srv fill:#2e75b6,stroke:#1f4e79,color:#ffffff
+    classDef client fill:#deebf7,stroke:#2e75b6,color:#0d2a45
+    classDef ro fill:#7f6000,stroke:#4d3a00,color:#ffffff
+    classDef net fill:#e2f0d9,stroke:#548235,color:#1e3d0f
+    classDef edge fill:#595959,stroke:#262626,color:#ffffff
+    classDef policy fill:#fff2cc,stroke:#bf9000,color:#4d3a00
 ```
+
+### Components
+
+| Component | Role |
+|---|---|
+| **corp.example.com** | Forest root domain at head office; holds the Enterprise Admins and the schema |
+| **north / south** | Child domains, each giving a region its own administrative boundary |
+| **RODC01** | Server Core read-only DC for a small site with weak physical security |
+| **Staff / IT-Admins OUs** | Separate standard and privileged accounts so policy can target each group |
+| **Block-Unapproved-Apps GPO** | Software Restriction path rules for unapproved desktop and Store apps |
+
+### Design Decisions
+
+| Decision | Rationale |
+|---|---|
+| Single forest, one child domain per region | Regional admin separation with a shared schema, Global Catalog and trusts |
+| RODC on Server Core | Smaller attack surface and patch footprint at the least secure site |
+| GPO linked at the **Staff OU**, not the domain | Scopes restrictions to standard users. Admins stay unaffected |
+| Path rules that include `WindowsApps` | Store apps install outside `Program Files`, so they need their own rules |
+| Verify with `gpresult /r` | Shows which GPOs actually reached each user, not just what was configured |
 
 ## What I Practised
 

@@ -9,18 +9,51 @@
 1. A second **writable DC** at a hub site, built without pulling the whole directory over the network.
 2. A **Read-Only DC** at the branch that caches passwords only for branch staff, so a stolen server exposes as little as possible.
 
-## Design
+## Solution Architecture
 
-```text
-          HUB SITE                                 BRANCH (slow WAN)
- ┌───────────────────────┐                   ┌──────────────────────────┐
- │ DC01  writable, GC    │── IFM media ───►  │                          │
- │ DC02  writable (IFM)  │                   │ RODC01  read-only DC     │
- └───────────────────────┘◄── replication ───│  caches: Branch-Users    │
-                                             │  denies: admin groups    │
-                                             │ CLIENT01                 │
-                                             └──────────────────────────┘
+```mermaid
+flowchart LR
+    subgraph HUB["Hub Site"]
+        DC01["DC01<br/>Writable DC · Global Catalog"]:::dc
+        DC02["DC02<br/>Writable DC<br/>(promoted from IFM)"]:::dc
+        IFM[("IFM media<br/>ntdsutil")]:::net
+    end
+    subgraph BRANCH["Branch Office – low physical security"]
+        RODC01["RODC01<br/>Read-Only DC · DNS"]:::ro
+        CLIENT["CLIENT01<br/>Branch workstation"]:::client
+    end
+    DC01 --> IFM --> DC02
+    DC01 <-- "AD replication" --> DC02
+    DC01 -- "one-way replication<br/>over slow WAN" --> RODC01
+    RODC01 --- CLIENT
+    PRP["Password Replication Policy<br/>✔ Allow: Branch-Users<br/>✖ Deny: privileged groups"]:::policy -.-> RODC01
+    classDef dc fill:#1f4e79,stroke:#0d2a45,color:#ffffff
+    classDef srv fill:#2e75b6,stroke:#1f4e79,color:#ffffff
+    classDef client fill:#deebf7,stroke:#2e75b6,color:#0d2a45
+    classDef ro fill:#7f6000,stroke:#4d3a00,color:#ffffff
+    classDef net fill:#e2f0d9,stroke:#548235,color:#1e3d0f
+    classDef edge fill:#595959,stroke:#262626,color:#ffffff
+    classDef policy fill:#fff2cc,stroke:#bf9000,color:#4d3a00
 ```
+
+### Components
+
+| Component | Role |
+|---|---|
+| **DC01** | Existing writable DC and Global Catalog; the source of the IFM media |
+| **DC02** | Additional writable DC, promoted from IFM so it doesn't need a full initial replication |
+| **RODC01** | Read-Only DC at the branch: no writable directory, and it caches approved passwords only |
+| **Branch-Users** | Security group of branch users and computers allowed to be cached on the RODC |
+
+### Design Decisions
+
+| Decision | Rationale |
+|---|---|
+| Install From Media for DC02 | Cuts initial replication traffic. Only changes since the media was made cross the network |
+| RODC at the branch, not a writable DC | If the server is stolen, little is exposed: no writable copy of AD, and only limited cached credentials |
+| Allow-list a single branch group | By default an RODC caches nothing, so only named users and computers are approved |
+| Keep the built-in **Deny** groups | Deny overrides Allow, so admin credentials are never cached at the branch |
+| Prepopulate passwords | Branch users can sign in even when the WAN link is down |
 
 ## What I Practised
 

@@ -11,19 +11,61 @@ A campus has five departments spread over several buildings, with PCs and IP pho
 - Keep working if **one core switch fails**
 - Give every department internet access through a **single public address**
 
-## Design
+## Solution Architecture
 
-```text
-                 ISP router
-                     │  public /30
-              Gateway router  (NAT overload, default route)
-               ╱            ╲   routed /30 links, RIPv2
-     L3 Core-1 (HSRP active) ══ L3 Core-2 (HSRP standby)
-        │  ╲   ╲   ╲  802.1Q trunks to every access switch  ╱
-   Bldg-1   Bldg-2   Bldg-3   Bldg-4        Server building
-   2960     2960     2960     2960          2960 + dept servers
-   VLANs per department: PCs + IP phones
+```mermaid
+flowchart TB
+    ISP["ISP Router"]:::edge
+    GW["Gateway Router<br/>NAT Overload (PAT) · Default route"]:::edge
+    C1["Core-1 · L3 Switch<br/>HSRP Active · RIPv2"]:::dc
+    C2["Core-2 · L3 Switch<br/>HSRP Standby · RIPv2"]:::dc
+    ISP <-- "public /30" --> GW
+    GW <-- "routed /30" --> C1
+    GW <-- "routed /30" --> C2
+    C1 <== "inter-core link" ==> C2
+
+    subgraph CAMPUS["Access Layer – 802.1Q trunks to both cores"]
+        B1["Building 1<br/>Access switch"]:::net
+        B2["Building 2<br/>Access switch"]:::net
+        B3["Building 3<br/>Access switch"]:::net
+        B4["Building 4<br/>Access switch"]:::net
+        SRV["Server Building<br/>Department servers"]:::srv
+    end
+    C1 --- B1 & B2 & B3 & B4 & SRV
+    C2 --- B1 & B2 & B3 & B4 & SRV
+    classDef dc fill:#1f4e79,stroke:#0d2a45,color:#ffffff
+    classDef srv fill:#2e75b6,stroke:#1f4e79,color:#ffffff
+    classDef client fill:#deebf7,stroke:#2e75b6,color:#0d2a45
+    classDef ro fill:#7f6000,stroke:#4d3a00,color:#ffffff
+    classDef net fill:#e2f0d9,stroke:#548235,color:#1e3d0f
+    classDef edge fill:#595959,stroke:#262626,color:#ffffff
+    classDef policy fill:#fff2cc,stroke:#bf9000,color:#4d3a00
 ```
+
+### Addressing Summary (example scheme)
+
+| Segment | VLAN | Prefix | Gateway (HSRP VIP) |
+|---|---|---|---|
+| Department 1 (largest) | 10 | 10.20.0.0/24 | 10.20.0.1 |
+| Department 2 | 20 | 10.20.1.0/25 | 10.20.1.1 |
+| Department 3 | 30 | 10.20.1.128/25 | 10.20.1.129 |
+| Department 4 | 40 | 10.20.2.0/26 | 10.20.2.1 |
+| Department 5 (smallest) | 50 | 10.20.2.64/27 | 10.20.2.65 |
+| Core ↔ Gateway links | – | 10.20.2.96/30, 10.20.2.100/30 | – |
+| Gateway ↔ ISP | – | 203.0.113.0/30 | – |
+
+The full VLSM worksheet is in the [runbook](runbook.md#1-vlsm-plan).
+
+### Design Decisions
+
+| Decision | Rationale |
+|---|---|
+| One VLAN and subnet per department | Smaller broadcast domains and a clear policy boundary |
+| VLSM, largest subnet first | No wasted space. Each subnet is sized to its host count |
+| Dual Layer 3 cores with HSRP | Removes the default gateway as a single point of failure |
+| Every access switch trunks to **both** cores | Any building survives the loss of one core |
+| RIPv2 with `no auto-summary` | Simple dynamic routing that keeps VLSM subnets intact |
+| PAT at the edge | The whole campus shares one public address |
 
 ## What I Practised
 
