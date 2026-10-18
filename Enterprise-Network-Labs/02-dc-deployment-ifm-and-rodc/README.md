@@ -14,26 +14,29 @@
 ```mermaid
 flowchart LR
     subgraph HUB["Hub Site"]
+        direction TB
         DC01["DC01<br/>Writable DC · Global Catalog"]:::dc
-        DC02["DC02<br/>Writable DC<br/>(promoted from IFM)"]:::dc
-        IFM[("IFM media<br/>ntdsutil")]:::net
+        IFM[("IFM media")]:::data
+        DC02["DC02<br/>Writable DC · built from IFM"]:::dc
+        DC01 --> IFM --> DC02
     end
-    subgraph BRANCH["Branch Office – low physical security"]
+    subgraph BR["Branch Office · low physical security"]
+        direction TB
         RODC01["RODC01<br/>Read-Only DC · DNS"]:::ro
         CLIENT["CLIENT01<br/>Branch workstation"]:::client
+        PRP["Password Replication Policy<br/>Allow: Branch-Users<br/>Deny: privileged groups"]:::policy
+        PRP -.- RODC01 --- CLIENT
     end
-    DC01 --> IFM --> DC02
-    DC01 <-- "AD replication" --> DC02
-    DC01 -- "one-way replication<br/>over slow WAN" --> RODC01
-    RODC01 --- CLIENT
-    PRP["Password Replication Policy<br/>✔ Allow: Branch-Users<br/>✖ Deny: privileged groups"]:::policy -.-> RODC01
+    HUB -- "one-way replication · WAN" --> BR
+    class HUB,BR zone
     classDef dc fill:#1f4e79,stroke:#0d2a45,color:#ffffff
     classDef srv fill:#2e75b6,stroke:#1f4e79,color:#ffffff
-    classDef client fill:#deebf7,stroke:#2e75b6,color:#0d2a45
-    classDef ro fill:#7f6000,stroke:#4d3a00,color:#ffffff
-    classDef net fill:#e2f0d9,stroke:#548235,color:#1e3d0f
-    classDef edge fill:#595959,stroke:#262626,color:#ffffff
-    classDef policy fill:#fff2cc,stroke:#bf9000,color:#4d3a00
+    classDef client fill:#ffffff,stroke:#2e75b6,color:#0d2a45
+    classDef ro fill:#8c6d1f,stroke:#5c4712,color:#ffffff
+    classDef data fill:#ffffff,stroke:#548235,color:#1e3d0f
+    classDef edge fill:#404040,stroke:#1a1a1a,color:#ffffff
+    classDef policy fill:#fff4d6,stroke:#bf9000,color:#4d3a00
+    classDef zone fill:#f4f7fb,stroke:#8aa4c0,color:#1f3a5a
 ```
 
 ### Components

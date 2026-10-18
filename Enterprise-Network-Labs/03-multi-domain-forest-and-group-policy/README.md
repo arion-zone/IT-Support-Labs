@@ -14,30 +14,30 @@ An organisation with a head office and two regional offices wants:
 
 ```mermaid
 flowchart TB
-    subgraph FOREST["Active Directory Forest"]
-        ROOT["corp.example.com<br/>Forest root · Head Office<br/>DC01"]:::dc
-        NORTH["north.corp.example.com<br/>Child domain · Region 1<br/>DC-NORTH"]:::dc
-        SOUTH["south.corp.example.com<br/>Child domain · Region 2<br/>DC-SOUTH"]:::dc
-        RODC["RODC01 · Server Core<br/>Read-Only DC for corp.example.com"]:::ro
+    ROOT["corp.example.com<br/>Forest root · Head Office · DC01"]:::dc
+    subgraph CHILD["Child Domains"]
+        NORTH["north.corp.example.com<br/>DC-NORTH"]:::dc
+        SOUTH["south.corp.example.com<br/>DC-SOUTH"]:::dc
     end
-    ROOT --> NORTH
-    ROOT --> SOUTH
+    RODC["RODC01 · Server Core<br/>Read-Only DC"]:::ro
+    subgraph OUS["Organisational Units"]
+        STAFF["OU: Staff"]:::client
+        ADMINS["OU: IT-Admins"]:::client
+    end
+    GPO["GPO: Block-Unapproved-Apps<br/>Software Restriction Policies"]:::policy
+    ROOT --> CHILD
     ROOT -. "read-only replica" .-> RODC
-
-    subgraph OUS["Organisational Units – corp.example.com"]
-        STAFF["OU: Staff<br/>Standard users"]:::client
-        ADMINS["OU: IT-Admins<br/>Privileged users"]:::client
-    end
-    ROOT --> STAFF
-    ROOT --> ADMINS
-    GPO["GPO: Block-Unapproved-Apps<br/>Software Restriction Policies"]:::policy -- "linked" --> STAFF
+    ROOT --> OUS
+    GPO -- "linked to" --> STAFF
+    class CHILD,OUS zone
     classDef dc fill:#1f4e79,stroke:#0d2a45,color:#ffffff
     classDef srv fill:#2e75b6,stroke:#1f4e79,color:#ffffff
-    classDef client fill:#deebf7,stroke:#2e75b6,color:#0d2a45
-    classDef ro fill:#7f6000,stroke:#4d3a00,color:#ffffff
-    classDef net fill:#e2f0d9,stroke:#548235,color:#1e3d0f
-    classDef edge fill:#595959,stroke:#262626,color:#ffffff
-    classDef policy fill:#fff2cc,stroke:#bf9000,color:#4d3a00
+    classDef client fill:#ffffff,stroke:#2e75b6,color:#0d2a45
+    classDef ro fill:#8c6d1f,stroke:#5c4712,color:#ffffff
+    classDef data fill:#ffffff,stroke:#548235,color:#1e3d0f
+    classDef edge fill:#404040,stroke:#1a1a1a,color:#ffffff
+    classDef policy fill:#fff4d6,stroke:#bf9000,color:#4d3a00
+    classDef zone fill:#f4f7fb,stroke:#8aa4c0,color:#1f3a5a
 ```
 
 ### Components

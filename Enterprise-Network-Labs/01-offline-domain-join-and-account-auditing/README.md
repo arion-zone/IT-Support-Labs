@@ -10,26 +10,27 @@ A company is building a server for a site that has no network path to a domain c
 
 ```mermaid
 flowchart LR
-    subgraph HQ["Head Office – corp.example.com"]
+    subgraph HQ["Head Office · corp.example.com"]
         DC01["DC01<br/>Domain Controller · DNS"]:::dc
-        GPO["Domain GPO<br/>Account Lockout Policy<br/>User Rights Assignment"]:::policy
+        GPO["Domain GPO<br/>Lockout policy · Logon rights"]:::policy
         CLIENT["CLIENT01<br/>Windows 10"]:::client
     end
-    subgraph SITE["Remote Site – no DC connectivity"]
-        SRV01["SRV01<br/>Member Server"]:::srv
+    BLOB[("Offline join blob")]:::data
+    subgraph SITE["Remote Site · no DC connectivity"]
+        SRV01["SRV01<br/>Member server"]:::srv
     end
-    DC01 -- "1 · djoin /provision<br/>creates computer account" --> BLOB[("Join blob<br/>(secure transfer)")]:::net
+    DC01 -- "1 · djoin /provision" --> BLOB
     BLOB -- "2 · djoin /requestODJ" --> SRV01
-    SRV01 -. "3 · reboot → domain member" .-> DC01
     GPO --> CLIENT
-    GPO --> SRV01
+    class HQ,SITE zone
     classDef dc fill:#1f4e79,stroke:#0d2a45,color:#ffffff
     classDef srv fill:#2e75b6,stroke:#1f4e79,color:#ffffff
-    classDef client fill:#deebf7,stroke:#2e75b6,color:#0d2a45
-    classDef ro fill:#7f6000,stroke:#4d3a00,color:#ffffff
-    classDef net fill:#e2f0d9,stroke:#548235,color:#1e3d0f
-    classDef edge fill:#595959,stroke:#262626,color:#ffffff
-    classDef policy fill:#fff2cc,stroke:#bf9000,color:#4d3a00
+    classDef client fill:#ffffff,stroke:#2e75b6,color:#0d2a45
+    classDef ro fill:#8c6d1f,stroke:#5c4712,color:#ffffff
+    classDef data fill:#ffffff,stroke:#548235,color:#1e3d0f
+    classDef edge fill:#404040,stroke:#1a1a1a,color:#ffffff
+    classDef policy fill:#fff4d6,stroke:#bf9000,color:#4d3a00
+    classDef zone fill:#f4f7fb,stroke:#8aa4c0,color:#1f3a5a
 ```
 
 ### Components

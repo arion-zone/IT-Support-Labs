@@ -16,30 +16,28 @@ A campus has five departments spread over several buildings, with PCs and IP pho
 ```mermaid
 flowchart TB
     ISP["ISP Router"]:::edge
-    GW["Gateway Router<br/>NAT Overload (PAT) · Default route"]:::edge
-    C1["Core-1 · L3 Switch<br/>HSRP Active · RIPv2"]:::dc
-    C2["Core-2 · L3 Switch<br/>HSRP Standby · RIPv2"]:::dc
-    ISP <-- "public /30" --> GW
-    GW <-- "routed /30" --> C1
-    GW <-- "routed /30" --> C2
-    C1 <== "inter-core link" ==> C2
-
-    subgraph CAMPUS["Access Layer – 802.1Q trunks to both cores"]
-        B1["Building 1<br/>Access switch"]:::net
-        B2["Building 2<br/>Access switch"]:::net
-        B3["Building 3<br/>Access switch"]:::net
-        B4["Building 4<br/>Access switch"]:::net
-        SRV["Server Building<br/>Department servers"]:::srv
+    GW["Gateway Router<br/>NAT overload · default route"]:::edge
+    subgraph CORE["Core Layer · RIPv2 · HSRP"]
+        direction LR
+        C1["Core-1 · L3 switch<br/>HSRP Active"]:::dc
+        C2["Core-2 · L3 switch<br/>HSRP Standby"]:::dc
+        C1 <==> C2
     end
-    C1 --- B1 & B2 & B3 & B4 & SRV
-    C2 --- B1 & B2 & B3 & B4 & SRV
+    BLD["Buildings 1–4 · access switches<br/>Department VLANs · PCs + IP phones"]:::client
+    SRV["Server Building<br/>Department servers"]:::srv
+    ISP <-- "public /30" --> GW
+    GW <-- "routed /30 links" --> CORE
+    CORE <-- "802.1Q trunks" --> BLD
+    CORE <-- "802.1Q trunks" --> SRV
+    class CORE zone
     classDef dc fill:#1f4e79,stroke:#0d2a45,color:#ffffff
     classDef srv fill:#2e75b6,stroke:#1f4e79,color:#ffffff
-    classDef client fill:#deebf7,stroke:#2e75b6,color:#0d2a45
-    classDef ro fill:#7f6000,stroke:#4d3a00,color:#ffffff
-    classDef net fill:#e2f0d9,stroke:#548235,color:#1e3d0f
-    classDef edge fill:#595959,stroke:#262626,color:#ffffff
-    classDef policy fill:#fff2cc,stroke:#bf9000,color:#4d3a00
+    classDef client fill:#ffffff,stroke:#2e75b6,color:#0d2a45
+    classDef ro fill:#8c6d1f,stroke:#5c4712,color:#ffffff
+    classDef data fill:#ffffff,stroke:#548235,color:#1e3d0f
+    classDef edge fill:#404040,stroke:#1a1a1a,color:#ffffff
+    classDef policy fill:#fff4d6,stroke:#bf9000,color:#4d3a00
+    classDef zone fill:#f4f7fb,stroke:#8aa4c0,color:#1f3a5a
 ```
 
 ### Addressing Summary (example scheme)
